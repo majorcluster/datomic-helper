@@ -1,10 +1,8 @@
 # datomic-helper
 
-A Clojure library designed to bring handful tools for using datomic-free
+A Clojure library with handful tools for helping the usage of datomic-free
 
 [![Clojars Project](https://img.shields.io/clojars/v/org.clojars.majorcluster/datomic-helper.svg)](https://clojars.org/org.clojars.majorcluster/datomic-helper)
-
-A Clojure library designed to bring handful tools for using datomic-free
 
 ## Usage
 
