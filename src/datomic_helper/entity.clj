@@ -33,7 +33,7 @@
           ((:q dcontext) q db id-ks id)
           (transform-out))))
   ([dcontext conn id-ks id]
-   (find-by-id dcontext conn id-ks id [*]))
+   (find-by-id dcontext conn id-ks id '[*]))
   ([conn id-ks id]
    (find-by-id database-context conn id-ks id)))
 
@@ -47,7 +47,7 @@
            ((:q dcontext) q db id-ks)
            (transform-out))))
   ([dcontext conn id-ks]
-   (find-all dcontext conn id-ks [*]))
+   (find-all dcontext conn id-ks '[*]))
   ([conn id-ks]
     (find-all database-context conn id-ks)))
 
