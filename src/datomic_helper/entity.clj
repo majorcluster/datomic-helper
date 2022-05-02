@@ -24,26 +24,30 @@
       transformed)))
 
 (defn find-by-id
-  ([dcontext conn id-ks id]
+  ([dcontext conn id-ks id pull-opts]
    (let [db ((:db dcontext) conn)
-         q '[:find (pull ?e [*]) .
+         q '[:find (pull ?e pull-opts) .
              :in $ ?id-ks ?id
              :where [?e ?id-ks ?id]]]
      (->> id
           ((:q dcontext) q db id-ks)
           (transform-out))))
+  ([dcontext conn id-ks id]
+   (find-by-id dcontext conn id-ks id [*]))
   ([conn id-ks id]
    (find-by-id database-context conn id-ks id)))
 
 (defn find-all
-  ([dcontext conn id-ks]
+  ([dcontext conn id-ks pull-opts]
     (let [db ((:db dcontext) conn)
-          q '[:find [(pull ?e [*]) ...]
+          q '[:find [(pull ?e pull-opts) ...]
               :in $ ?id-ks
               :where [?e ?id-ks]]]
       (->> id-ks
            ((:q dcontext) q db)
            (transform-out))))
+  ([dcontext conn id-ks]
+   (find-all dcontext conn id-ks [*]))
   ([conn id-ks]
     (find-all database-context conn id-ks)))
 
@@ -88,3 +92,22 @@
             :else (insert! dcontext conn to-be-saved))))
   ([conn [id-ks id] to-be-saved]
     (upsert! database-context conn [id-ks id] to-be-saved)))
+
+(defn insert-foreign!
+  ([dcontext conn parent-ks parent-id child-ks child]
+   (let [temp-id "temp-id"
+         complete (merge child {:db/id temp-id})
+         parent-ref {parent-ks parent-id
+                      child-ks temp-id}]
+     ((:transact dcontext) conn [complete parent-ref])))
+  ([conn parent-ks parent-id child-ks child]
+   (insert-foreign! database-context conn parent-ks parent-id child-ks child)))
+
+(defn upsert-foreign!
+  ([dcontext conn [id-ks id] parent-ks parent-id child-ks to-be-saved]
+   (let [found-entity (find-by-id dcontext conn id-ks id)]
+     (cond found-entity
+           (update! dcontext conn id-ks id found-entity to-be-saved)
+           :else (insert-foreign! dcontext conn parent-ks parent-id child-ks to-be-saved))))
+  ([conn [id-ks id] parent-ks parent-id child-ks to-be-saved]
+   (upsert-foreign! database-context conn [id-ks id] parent-ks parent-id child-ks to-be-saved)))

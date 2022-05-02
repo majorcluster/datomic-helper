@@ -26,11 +26,13 @@ export GPG_TTY=$(tty) && lein deploy clojars
 | Functions     | Description |
 | ------------- | ----------- |
 | transform-out [result] |  transforms d/q query results by removing db/id from root and nested maps <br> `(transform-out {:db/id 12 :name "Rosa"}) => {:name "Rosa"}`|
-| find-by-id [conn id-ks id] | finds single result by id <br> `(find-by-id conn :product-id 1917) => {:product-id 1917}`|
-| find-all [conn id-ks] | finds all entries having a key <br> `(find-all conn :product-id) => [{:product-id 24},{:product-id 1917}]`|
+| find-by-id [conn id-ks id & pull-opts] | finds single result by id, pull-opts default is [*] <br> `(find-by-id conn :product-id 1917) => {:product-id 1917}` <br> `(find-by-id conn :product-id 1917 [* {:product/category [*]]}) => {:product-id 1917, :product/category {:category/id 12}}`|
+| find-all [conn id-ks & pull-opts] | finds all entries having a key, pull-opts default is [*] <br> `(find-all conn :product-id) => [{:product-id 24},{:product-id 1917}]` <br> `(find-all conn :product-id [* {:product/category [*]]) => [{:product-id 24, :product/category {:category/id 15}},{:product-id 1917, :product/category {:category/id 12}}]`|
 | update! [conn id-ks id found-entity to-be-saved] | updates entity by matching id-key and its value, intersecting found-entity with to-be-saved, therefore using :db/cas strategy, not updating if the value before is not the same anymore in db <br> `(update! conn :product-id 1917 {:age 0} {:age 1917})`|
 | insert! [conn to-be-saved] | inserts entity by using a simple datomic transact <br> `(insert! conn {:product-id 8990})` |
 | upsert! [conn [id-ks id] to-be-saved] | upserts entity, finding it by specified id or ks and executing either **insert!** or **update!** <br> `(upsert! conn [:product-id 1917] {:done true})` |
+| insert-foreign! [conn parent-ks parent-id child-ks child] | inserts foreign entity connected to a parent entity by using a simple datomic transact <br> `(insert-foreign! conn :product-id 8990 )` |
+| upsert-foreign! [conn [id-ks id] parent-ks parent-id child-ks to-be-saved] | upserts foreign entity connected with a parent, finding it by specified id or ks and executing either **insert-foreign!** or **update!** <br> `(upsert! conn [:product-id 1917] {:done true})` |
 
 ### datomic-helper/schema-transform
 

@@ -110,3 +110,13 @@
     (let [db-context (test-database-context nil)]
       (is (= [{:age 49}]
              (upsert! db-context {} [:name "Rosa"] {:age 49}))))))
+
+(deftest upsert-foreign-test
+  (testing "when entity is found, db/cas cols are returned"
+    (let [db-context (test-database-context {:age 45, :name "Prestes"})]
+      (is (= [[:db/cas [:name "Prestes"] :age 45 49]]
+             (upsert-foreign! db-context {} [:name "Prestes"] :group-id 17 :group/person {:age 49})))))
+  (testing "when entity is not found, db/cas cols with parent are returned"
+    (let [db-context (test-database-context nil)]
+      (is (= [{:age 49, :db/id "temp-id"} {:group-id 17, :group/person "temp-id"}]
+             (upsert-foreign! db-context {} [:name "Prestes"] :group-id 17 :group/person {:age 49}))))))
