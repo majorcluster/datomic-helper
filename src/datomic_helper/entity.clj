@@ -26,11 +26,11 @@
 (defn find-by-id
   ([dcontext conn id-ks id pull-opts]
    (let [db ((:db dcontext) conn)
-         q '[:find (pull ?e pull-opts) .
-             :in $ ?id-ks ?id
+         q '[:find (pull ?e ?pull-opts) .
+             :in $ ?id-ks ?id ?pull-opts
              :where [?e ?id-ks ?id]]]
-     (->> id
-          ((:q dcontext) q db id-ks)
+     (->> pull-opts
+          ((:q dcontext) q db id-ks id)
           (transform-out))))
   ([dcontext conn id-ks id]
    (find-by-id dcontext conn id-ks id [*]))
@@ -40,11 +40,11 @@
 (defn find-all
   ([dcontext conn id-ks pull-opts]
     (let [db ((:db dcontext) conn)
-          q '[:find [(pull ?e pull-opts) ...]
-              :in $ ?id-ks
+          q '[:find [(pull ?e ?pull-opts) ...]
+              :in $ ?id-ks ?pull-opts
               :where [?e ?id-ks]]]
-      (->> id-ks
-           ((:q dcontext) q db)
+      (->> pull-opts
+           ((:q dcontext) q db id-ks)
            (transform-out))))
   ([dcontext conn id-ks]
    (find-all dcontext conn id-ks [*]))
