@@ -104,10 +104,10 @@
    (insert-foreign! database-context conn parent-ks parent-id child-ks child)))
 
 (defn upsert-foreign!
-  ([dcontext conn [id-ks id] parent-ks parent-id child-ks to-be-saved]
-   (let [found-entity (find-by-id dcontext conn id-ks id)]
+  ([dcontext conn parent-ks parent-id child-ks to-be-saved]
+   (let [found-entity (find-by-id dcontext conn parent-ks parent-id)]
      (cond found-entity
-           (update! dcontext conn id-ks id found-entity to-be-saved)
+           (update! dcontext conn parent-ks parent-id found-entity to-be-saved)
            :else (insert-foreign! dcontext conn parent-ks parent-id child-ks to-be-saved))))
-  ([conn [id-ks id] parent-ks parent-id child-ks to-be-saved]
-   (upsert-foreign! database-context conn [id-ks id] parent-ks parent-id child-ks to-be-saved)))
+  ([conn parent-ks parent-id child-ks to-be-saved]
+   (upsert-foreign! database-context conn parent-ks parent-id child-ks to-be-saved)))

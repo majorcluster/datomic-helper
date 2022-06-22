@@ -21,6 +21,9 @@ A Clojure library with handful tools for helping the usage of datomic-free
 export GPG_TTY=$(tty) && lein deploy clojars
 ```
 
+## Migration
+[Migration guide](https://github.com/mtsbarbosa/datomic-helper/tree/main/doc/MIGRATION.md)
+
 ## Documentation
 ### datomic-helper/entity
 | Functions     | Description |
@@ -31,8 +34,8 @@ export GPG_TTY=$(tty) && lein deploy clojars
 | update! [conn id-ks id found-entity to-be-saved] | updates entity by matching id-key and its value, intersecting found-entity with to-be-saved, therefore using :db/cas strategy, not updating if the value before is not the same anymore in db <br> `(update! conn :product-id 1917 {:age 0} {:age 1917})`|
 | insert! [conn to-be-saved] | inserts entity by using a simple datomic transact <br> `(insert! conn {:product-id 8990})` |
 | upsert! [conn [id-ks id] to-be-saved] | upserts entity, finding it by specified id or ks and executing either **insert!** or **update!** <br> `(upsert! conn [:product-id 1917] {:done true})` |
-| insert-foreign! [conn parent-ks parent-id child-ks child] | inserts foreign entity connected to a parent entity by using a simple datomic transact <br> `(insert-foreign! conn :product-id 8990 )` |
-| upsert-foreign! [conn [id-ks id] parent-ks parent-id child-ks to-be-saved] | upserts foreign entity connected with a parent, finding it by specified id or ks and executing either **insert-foreign!** or **update!** <br> `(upsert! conn [:product-id 1917] {:done true})` |
+| insert-foreign! [conn parent-ks parent-id child-ks child] | inserts foreign entity connected to a parent entity by using a simple datomic transact <br> `(insert-foreign! conn :product/id 8990 :product/category {:category/name "t-shirts"} )` |
+| upsert-foreign! [conn [id-ks id] parent-ks parent-id child-ks to-be-saved] | upserts foreign entity connected with a parent, finding it by specified id or ks and executing either **insert-foreign!** or **update!** <br> `(upsert-foreign! conn [:product-id 1917] {:done true})` |
 
 ### datomic-helper/schema-transform
 
