@@ -35,7 +35,7 @@ export GPG_TTY=$(tty) && lein deploy clojars
 | insert! [conn to-be-saved] | inserts entity by using a simple datomic transact <br> `(insert! conn {:product-id 8990})` |
 | upsert! [conn [id-ks id] to-be-saved] | upserts entity, finding it by specified id or ks and executing either **insert!** or **update!** <br> `(upsert! conn [:product-id 1917] {:done true})` |
 | insert-foreign! [conn parent-ks parent-id child-ks child] | inserts foreign entity connected to a parent entity by using a simple datomic transact <br> `(insert-foreign! conn :product/id 8990 :product/category {:category/name "t-shirts"} )` |
-| upsert-foreign! [conn [id-ks id] parent-ks parent-id child-ks to-be-saved] | upserts foreign entity connected with a parent, finding it by specified id or ks and executing either **insert-foreign!** or **update!** <br> `(upsert-foreign! conn [:product-id 1917] {:done true})` |
+| upsert-foreign! [conn [id-ks id] parent-ks parent-id child-ks to-be-saved] | upserts foreign entity connected with a parent, finding it by specified id or ks and executing either **insert-foreign!** or **update!** <br> `(upsert-foreign! conn :product/id 8990 :product/category {:category/name "t-shirts"})` |
 
 ### datomic-helper/schema-transform
 
