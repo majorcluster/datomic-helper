@@ -120,3 +120,9 @@
     (let [db-context (test-database-context nil)]
       (is (= [{:age 49, :db/id "temp-id"} {:group/id 17, :group/person "temp-id"}]
              (upsert-foreign! db-context {} :group/id 17 :group/person {:age 49}))))))
+
+(deftest delete-test
+  (testing "when deleting retract entity with look up ref is returned"
+    (let [db-context (test-database-context nil)]
+      (is (= [[:db/retractEntity [:group/id 17]]]
+             (delete! db-context {} :group/id 17))))))

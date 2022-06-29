@@ -111,3 +111,12 @@
            :else (insert-foreign! dcontext conn parent-ks parent-id child-ks to-be-saved))))
   ([conn parent-ks parent-id child-ks to-be-saved]
    (upsert-foreign! database-context conn parent-ks parent-id child-ks to-be-saved)))
+
+(defn delete!
+  ([dcontext conn ks id]
+   (let [lookup-ref [ks id]]
+     ((:transact dcontext)
+        conn
+        [[:db/retractEntity lookup-ref]])))
+  ([conn ks id]
+   (delete! database-context conn ks id)))
