@@ -8,22 +8,20 @@
     (merge {:db/cardinality :db.cardinality/many}
            (props-from-value (first value)))
     (cond (= value UUID) {:db/valueType        :db.type/uuid
-                                    :db/unique :db.unique/identity}
+                          :db/unique :db.unique/identity}
           (= value s/Str) {:db/valueType :db.type/string}
           (= value BigDecimal) {:db/valueType :db.type/bigdec}
           (= value Long) {:db/valueType :db.type/long}
           (= value s/Keyword) {:db/valueType :db.type/keyword}
           (map? value) {:db/valueType :db.type/ref}
           (= value s/Bool) {:db/valueType :db.type/boolean}
-          :else {:error "unknown" :type (type value) :class (class value)}
-          ))
-  )
+          :else {:error "unknown" :type (type value) :class (class value)})))
 
 (defn has-element-by-keyword?
   [el map keyword]
   (cond (empty? map) false
         (.contains
-          (get map keyword []) el) true
+         (get map keyword []) el) true
         :else false))
 
 (defn is-indexed?
@@ -64,8 +62,8 @@
         base {:db/ident extracted-key
               :db/cardinality :db.cardinality/one}
         extra (merge
-                (props-from-value value)
-                (extract-key-extra-props-from-configs extracted-key configs))]
+               (props-from-value value)
+               (extract-key-extra-props-from-configs extracted-key configs))]
     (merge base extra)))
 
 (defn map-schema-to-datomic
@@ -87,8 +85,7 @@
                   (cond (map? el1)
                         (conj [(keyvalue-to-def (:key el1) (:value el1) configs)]
                               (keyvalue-to-def (:key el2) (:value el2) configs))
-                        :else (conj el1 (keyvalue-to-def (:key el2) (:value el2) configs)))
-                  ))))
+                        :else (conj el1 (keyvalue-to-def (:key el2) (:value el2) configs)))))))
   ([definition]
    (schema-to-datomic definition {})))
 
@@ -97,7 +94,6 @@
   ([definitions configs]
    (reduce (fn [col definition]
              (let [converted (schema-to-datomic definition configs)]
-               (println "converted" converted)
                (concat col converted)))
            []
            definitions))

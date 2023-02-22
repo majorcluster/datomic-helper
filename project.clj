@@ -1,4 +1,4 @@
-(defproject org.clojars.majorcluster/datomic-helper "1.2.0"
+(defproject org.clojars.majorcluster/datomic-helper "2.0.0"
   :description "A Clojure Library with tools to help using datomic"
   :url "https://github.com/mtsbarbosa/datomic-helper"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
@@ -6,4 +6,11 @@
   :dependencies [[org.clojure/clojure "1.11.1"]
                  [prismatic/schema "1.4.1"]
                  [com.datomic/datomic-free "0.9.5697"]]
-  :profiles {:dev {}})
+  :profiles {:dev {:plugins [[com.github.clojure-lsp/lein-clojure-lsp "1.3.17"]]}}
+  :aliases {"diagnostics"     ["clojure-lsp" "diagnostics"]
+            "format"          ["clojure-lsp" "format" "--dry"]
+            "format-fix"      ["clojure-lsp" "format"]
+            "clean-ns"        ["clojure-lsp" "clean-ns" "--dry"]
+            "clean-ns-fix"    ["clojure-lsp" "clean-ns"]
+            "lint"            ["do" ["diagnostics"]  ["format"] ["clean-ns"]]
+            "lint-fix"        ["do" ["format-fix"] ["clean-ns-fix"]]})
