@@ -1,6 +1,6 @@
-(defproject org.clojars.majorcluster/datomic-helper "2.0.1"
+(defproject org.clojars.majorcluster/datomic-helper "2.0.2"
   :description "A Clojure Library with tools to help using datomic"
-  :url "https://github.com/mtsbarbosa/datomic-helper"
+  :url "https://github.com/majorcluster/datomic-helper"
   :license {:name "The MIT License"
             :url "http://opensource.org/licenses/MIT"}
   :dependencies [[org.clojure/clojure "1.11.1"]
