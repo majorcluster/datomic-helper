@@ -84,11 +84,14 @@
    (insert! database-context conn to-be-saved)))
 
 (defn upsert!
-  ([dcontext conn [id-ks id] to-be-saved]
+  ([dcontext conn [id-ks id] to-be-saved unique-check]
    (let [found-entity (find-by-id dcontext conn id-ks id)]
      (cond found-entity
-           (update! dcontext conn id-ks id found-entity to-be-saved)
+           (when (unique-check)
+             (update! dcontext conn id-ks id found-entity to-be-saved))
            :else (insert! dcontext conn to-be-saved))))
+  ([dcontext conn [id-ks id] to-be-saved]
+   (upsert! dcontext conn [id-ks id] to-be-saved (fn [] true)))
   ([conn [id-ks id] to-be-saved]
    (upsert! database-context conn [id-ks id] to-be-saved)))
 

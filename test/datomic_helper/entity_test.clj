@@ -109,7 +109,10 @@
   (testing "when entity is not found, db/cas cols are returned"
     (let [db-context (test-database-context nil)]
       (is (= [{:age 49}]
-             (d-h.entity/upsert! db-context {} [:name "Rosa"] {:age 49}))))))
+             (d-h.entity/upsert! db-context {} [:name "Rosa"] {:age 49})))))
+  (testing "when entity is not unique"
+    (let [db-context (test-database-context {:age 35, :name "Rosa"})]
+      (is (nil? (d-h.entity/upsert! db-context {} [:name "Rosa"] {:age 49} (fn [] false)))))))
 
 (deftest upsert-foreign-test
   (testing "when entity is found, db/add is returned"
