@@ -12,3 +12,7 @@ so they were unified
   `upsert-foreign! [conn foreign-ks foreign-id ref-ks main-ks main-id]`
 
   - upsert foreign was not working at all, now it is inserting or updating foreign refs with :db/add
+
+## 2.* => 3.0.0
+- dcontext as first argument arities was removed from all functions, due to confusion adding new features. Simply remove the first argument if you are using it 
+- to mock database functions instead of using dcontext use [with-derefs](https://clojuredocs.org/clojure.core/with-redefs)

@@ -102,19 +102,19 @@
 
 (deftest has-element-by-keyword-test?
   (testing "gives true when has keyword as array containing element"
-    (is (s.transform/has-element-by-keyword? 1 {:test [1]} :test))
-    (is (s.transform/has-element-by-keyword? 1 {:test [1,5,3]} :test))
-    (is (s.transform/has-element-by-keyword? 1 {:test [1] :something-else [1]} :test))
-    (is (s.transform/has-element-by-keyword? 1 {:test [1] :something-else [1]} :something-else)))
+    (is (@#'s.transform/has-element-by-keyword? 1 {:test [1]} :test))
+    (is (@#'s.transform/has-element-by-keyword? 1 {:test [1,5,3]} :test))
+    (is (@#'s.transform/has-element-by-keyword? 1 {:test [1] :something-else [1]} :test))
+    (is (@#'s.transform/has-element-by-keyword? 1 {:test [1] :something-else [1]} :something-else)))
   (testing "gives false when is empty or array is empty"
-    (is (not (s.transform/has-element-by-keyword? 1 {} :test)))
-    (is (not (s.transform/has-element-by-keyword? 1 {:test []} :test)))
-    (is (not (s.transform/has-element-by-keyword? 1 {:test [] :something-else [1]} :test))))
+    (is (not (@#'s.transform/has-element-by-keyword? 1 {} :test)))
+    (is (not (@#'s.transform/has-element-by-keyword? 1 {:test []} :test)))
+    (is (not (@#'s.transform/has-element-by-keyword? 1 {:test [] :something-else [1]} :test))))
   (testing "gives false when is not present in array"
-    (is (not (s.transform/has-element-by-keyword? "1" {:test ["2", "3", "10"]} :test)))
-    (is (not (s.transform/has-element-by-keyword? "1" {:test ["4" "-1"] :something-else ["1"]} :test)))
-    (is (not (s.transform/has-element-by-keyword? 1 {:test ["1"] :something-else ["1"]} :test)))
-    (is (not (s.transform/has-element-by-keyword? 1 {:test [4,-1] :something-else []} :test)))))
+    (is (not (@#'s.transform/has-element-by-keyword? "1" {:test ["2", "3", "10"]} :test)))
+    (is (not (@#'s.transform/has-element-by-keyword? "1" {:test ["4" "-1"] :something-else ["1"]} :test)))
+    (is (not (@#'s.transform/has-element-by-keyword? 1 {:test ["1"] :something-else ["1"]} :test)))
+    (is (not (@#'s.transform/has-element-by-keyword? 1 {:test [4,-1] :something-else []} :test)))))
 
 (deftest assoc-when-element-predicate-of-config-test
   (let [simple-true-predicate (fn [_ _] true)
@@ -122,39 +122,39 @@
         simple-config {:indexed [3]}
         longer-config {:indexed ["my-key"] :another-list [1,2]}
         has-el-by-keyword-predicate (fn [key configs]
-                                      (s.transform/has-element-by-keyword? key configs :indexed))]
+                                      (@#'s.transform/has-element-by-keyword? key configs :indexed))]
     (testing "when predicate returns true assoc"
       (is (= {:old [1200] :new [-90]}
-             (s.transform/assoc-when-element-predicate-of-config {:old [1200]} {} 1 simple-true-predicate :new [-90])))
+             (@#'s.transform/assoc-when-element-predicate-of-config {:old [1200]} {} 1 simple-true-predicate :new [-90])))
       (is (= {:new [-90]}
-             (s.transform/assoc-when-element-predicate-of-config {} {} 1 simple-true-predicate :new [-90])))
+             (@#'s.transform/assoc-when-element-predicate-of-config {} {} 1 simple-true-predicate :new [-90])))
       (is (= {:new [-90]}
-             (s.transform/assoc-when-element-predicate-of-config {:new [-90]} {} 1 simple-true-predicate :new [-90]))))
+             (@#'s.transform/assoc-when-element-predicate-of-config {:new [-90]} {} 1 simple-true-predicate :new [-90]))))
     (testing "when s.transform/has-element-by-keyword? returns true assoc"
       (is (= {:old [1200] :new [-90]}
-             (s.transform/assoc-when-element-predicate-of-config {:old [1200]} simple-config 3 has-el-by-keyword-predicate :new [-90])))
+             (@#'s.transform/assoc-when-element-predicate-of-config {:old [1200]} simple-config 3 has-el-by-keyword-predicate :new [-90])))
       (is (= {:old [1200, "-90"] :new [-90]}
-             (s.transform/assoc-when-element-predicate-of-config {:old [1200, "-90"]} simple-config 3 has-el-by-keyword-predicate :new [-90])))
+             (@#'s.transform/assoc-when-element-predicate-of-config {:old [1200, "-90"]} simple-config 3 has-el-by-keyword-predicate :new [-90])))
       (is (= {:new [-90]}
-             (s.transform/assoc-when-element-predicate-of-config {:new [-90]} simple-config 3 has-el-by-keyword-predicate :new [-90])))
+             (@#'s.transform/assoc-when-element-predicate-of-config {:new [-90]} simple-config 3 has-el-by-keyword-predicate :new [-90])))
       (is (= {:new [-90]}
-             (s.transform/assoc-when-element-predicate-of-config {:new [-90]} longer-config "my-key" has-el-by-keyword-predicate :new [-90]))))
+             (@#'s.transform/assoc-when-element-predicate-of-config {:new [-90]} longer-config "my-key" has-el-by-keyword-predicate :new [-90]))))
     (testing "when predicate returns false dont assoc"
       (is (= {:old [-4000]}
-             (s.transform/assoc-when-element-predicate-of-config {:old [-4000]} {} 1 simple-false-predicate :new [-90])))
+             (@#'s.transform/assoc-when-element-predicate-of-config {:old [-4000]} {} 1 simple-false-predicate :new [-90])))
       (is (= {}
-             (s.transform/assoc-when-element-predicate-of-config {} {} 1 simple-false-predicate :new [-90])))
+             (@#'s.transform/assoc-when-element-predicate-of-config {} {} 1 simple-false-predicate :new [-90])))
       (is (= {:new ["8500"]}
-             (s.transform/assoc-when-element-predicate-of-config {:new ["8500"]} {} 1 simple-false-predicate :new [-90]))))
+             (@#'s.transform/assoc-when-element-predicate-of-config {:new ["8500"]} {} 1 simple-false-predicate :new [-90]))))
     (testing "when s.transform/has-element-by-keyword? returns false dont assoc"
       (is (= {:old [1200]}
-             (s.transform/assoc-when-element-predicate-of-config {:old [1200]} simple-config -1 has-el-by-keyword-predicate :new [-90])))
+             (@#'s.transform/assoc-when-element-predicate-of-config {:old [1200]} simple-config -1 has-el-by-keyword-predicate :new [-90])))
       (is (= {:old [1200, "-90"]}
-             (s.transform/assoc-when-element-predicate-of-config {:old [1200, "-90"]} simple-config 90 has-el-by-keyword-predicate :new [-90])))
+             (@#'s.transform/assoc-when-element-predicate-of-config {:old [1200, "-90"]} simple-config 90 has-el-by-keyword-predicate :new [-90])))
       (is (= {:new [-90]}
-             (s.transform/assoc-when-element-predicate-of-config {:new [-90]} simple-config "other-key" has-el-by-keyword-predicate :new [-90])))
+             (@#'s.transform/assoc-when-element-predicate-of-config {:new [-90]} simple-config "other-key" has-el-by-keyword-predicate :new [-90])))
       (is (= {:new [-90]}
-             (s.transform/assoc-when-element-predicate-of-config {:new [-90]} longer-config "other-key" has-el-by-keyword-predicate :new [-90]))))))
+             (@#'s.transform/assoc-when-element-predicate-of-config {:new [-90]} longer-config "other-key" has-el-by-keyword-predicate :new [-90]))))))
 
 (deftest extract-key-extra-props-from-configs-test
   (let [extra-props-indexed {:db/index true}
@@ -163,68 +163,68 @@
         simple-idx-config {:indexed ["my-key"]}
         simple-idx-n-comp-config {:indexed ["my-key"] :components ["my-key"]}]
     (testing "adding indexed when configured"
-      (is (= (s.transform/extract-key-extra-props-from-configs "my-key", simple-idx-config)
+      (is (= (@#'s.transform/extract-key-extra-props-from-configs "my-key", simple-idx-config)
              extra-props-indexed))
-      (is (= (s.transform/extract-key-extra-props-from-configs "my-key", simple-idx-n-comp-config)
+      (is (= (@#'s.transform/extract-key-extra-props-from-configs "my-key", simple-idx-n-comp-config)
              extra-props-index-and-component)))
     (testing "not adding when not configured"
-      (is (= (s.transform/extract-key-extra-props-from-configs "other-key", simple-idx-config)
+      (is (= (@#'s.transform/extract-key-extra-props-from-configs "other-key", simple-idx-config)
              {}))
-      (is (= (s.transform/extract-key-extra-props-from-configs "other-key", simple-idx-n-comp-config)
+      (is (= (@#'s.transform/extract-key-extra-props-from-configs "other-key", simple-idx-n-comp-config)
              {})))))
 
 (deftest keyvalue-to-def-test
   (testing "fields without extra configs are converted"
-    (is (= (s.transform/keyvalue-to-def :my-id s/Uuid {})
+    (is (= (@#'s.transform/keyvalue-to-def :my-id s/Uuid {})
            (uuid-datomic-def :my-id)))
-    (is (= (s.transform/keyvalue-to-def :my-string s/Str {})
+    (is (= (@#'s.transform/keyvalue-to-def :my-string s/Str {})
            (string-datomic-def :my-string)))
-    (is (= (s.transform/keyvalue-to-def :my-long Long {})
+    (is (= (@#'s.transform/keyvalue-to-def :my-long Long {})
            (long-datomic-def :my-long)))
-    (is (= (s.transform/keyvalue-to-def :my-bigdec BigDecimal {})
+    (is (= (@#'s.transform/keyvalue-to-def :my-bigdec BigDecimal {})
            (bigdec-datomic-def :my-bigdec)))
-    (is (= (s.transform/keyvalue-to-def :my-keyword s/Keyword {})
+    (is (= (@#'s.transform/keyvalue-to-def :my-keyword s/Keyword {})
            (keyword-datomic-def :my-keyword)))
-    (is (= (s.transform/keyvalue-to-def :my-keyword-col [s/Keyword] {})
+    (is (= (@#'s.transform/keyvalue-to-def :my-keyword-col [s/Keyword] {})
            (keyword-col-datomic-def :my-keyword-col)))
-    (is (= (s.transform/keyvalue-to-def :my-bool s/Bool {})
+    (is (= (@#'s.transform/keyvalue-to-def :my-bool s/Bool {})
            (bool-datomic-def :my-bool)))
-    (is (= (s.transform/keyvalue-to-def :my-ref (MangoProducerDef) {})
+    (is (= (@#'s.transform/keyvalue-to-def :my-ref (MangoProducerDef) {})
            (ref-datomic-def :my-ref)))
-    (is (= (s.transform/keyvalue-to-def :my-ref-col [(MangoProducerDef)] {})
+    (is (= (@#'s.transform/keyvalue-to-def :my-ref-col [(MangoProducerDef)] {})
            (ref-col-datomic-def :my-ref-col))))
   (testing "fields with extra configs are coverted"
-    (is (= (s.transform/keyvalue-to-def :my-bigdec BigDecimal {:indexed [:my-bigdec]})
+    (is (= (@#'s.transform/keyvalue-to-def :my-bigdec BigDecimal {:indexed [:my-bigdec]})
            (bigdec-datomic-index-def :my-bigdec)))
-    (is (= (s.transform/keyvalue-to-def :my-ref [(MangoProducerDef)] {:components [:my-ref]})
+    (is (= (@#'s.transform/keyvalue-to-def :my-ref [(MangoProducerDef)] {:components [:my-ref]})
            (ref-col-datomic-component-def :my-ref)))
-    (is (= (s.transform/keyvalue-to-def :my-bool s/Bool {:historyless [:my-bool]})
+    (is (= (@#'s.transform/keyvalue-to-def :my-bool s/Bool {:historyless [:my-bool]})
            (bool-datomic-historyless-def :my-bool))))
   (testing "optional fields without extra configs are converted"
-    (is (= (s.transform/keyvalue-to-def (s/optional-key :my-id) s/Uuid {})
+    (is (= (@#'s.transform/keyvalue-to-def (s/optional-key :my-id) s/Uuid {})
            (uuid-datomic-def :my-id)))
-    (is (= (s.transform/keyvalue-to-def (s/optional-key :my-string) s/Str {})
+    (is (= (@#'s.transform/keyvalue-to-def (s/optional-key :my-string) s/Str {})
            (string-datomic-def :my-string)))
-    (is (= (s.transform/keyvalue-to-def (s/optional-key :my-long) Long {})
+    (is (= (@#'s.transform/keyvalue-to-def (s/optional-key :my-long) Long {})
            (long-datomic-def :my-long)))
-    (is (= (s.transform/keyvalue-to-def (s/optional-key :my-bigdec) BigDecimal {})
+    (is (= (@#'s.transform/keyvalue-to-def (s/optional-key :my-bigdec) BigDecimal {})
            (bigdec-datomic-def :my-bigdec)))
-    (is (= (s.transform/keyvalue-to-def (s/optional-key :my-keyword) s/Keyword {})
+    (is (= (@#'s.transform/keyvalue-to-def (s/optional-key :my-keyword) s/Keyword {})
            (keyword-datomic-def :my-keyword)))
-    (is (= (s.transform/keyvalue-to-def (s/optional-key :my-keyword-col) [s/Keyword] {})
+    (is (= (@#'s.transform/keyvalue-to-def (s/optional-key :my-keyword-col) [s/Keyword] {})
            (keyword-col-datomic-def :my-keyword-col)))
-    (is (= (s.transform/keyvalue-to-def (s/optional-key :my-bool) s/Bool {})
+    (is (= (@#'s.transform/keyvalue-to-def (s/optional-key :my-bool) s/Bool {})
            (bool-datomic-def :my-bool)))
-    (is (= (s.transform/keyvalue-to-def (s/optional-key :my-ref) (MangoProducerDef) {})
+    (is (= (@#'s.transform/keyvalue-to-def (s/optional-key :my-ref) (MangoProducerDef) {})
            (ref-datomic-def :my-ref)))
-    (is (= (s.transform/keyvalue-to-def (s/optional-key :my-ref-col) [(MangoProducerDef)] {})
+    (is (= (@#'s.transform/keyvalue-to-def (s/optional-key :my-ref-col) [(MangoProducerDef)] {})
            (ref-col-datomic-def :my-ref-col))))
   (testing "optional fields with extra configs are coverted"
-    (is (= (s.transform/keyvalue-to-def (s/optional-key :my-bigdec) BigDecimal {:indexed [:my-bigdec]})
+    (is (= (@#'s.transform/keyvalue-to-def (s/optional-key :my-bigdec) BigDecimal {:indexed [:my-bigdec]})
            (bigdec-datomic-index-def :my-bigdec)))
-    (is (= (s.transform/keyvalue-to-def (s/optional-key :my-ref) [(MangoProducerDef)] {:components [:my-ref]})
+    (is (= (@#'s.transform/keyvalue-to-def (s/optional-key :my-ref) [(MangoProducerDef)] {:components [:my-ref]})
            (ref-col-datomic-component-def :my-ref)))
-    (is (= (s.transform/keyvalue-to-def (s/optional-key :my-bool) s/Bool {:historyless [:my-bool]})
+    (is (= (@#'s.transform/keyvalue-to-def (s/optional-key :my-bool) s/Bool {:historyless [:my-bool]})
            (bool-datomic-historyless-def :my-bool)))))
 
 (deftest schema-to-datomic-test

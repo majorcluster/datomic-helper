@@ -1,6 +1,7 @@
 (ns datomic-helper.schema-transform
   (:require [schema.core :as s])
-  (:import (java.util UUID)))
+  (:import (java.util UUID)
+           [schema.core OptionalKey]))
 
 (defn props-from-value
   [value]
@@ -17,38 +18,38 @@
           (= value s/Bool) {:db/valueType :db.type/boolean}
           :else {:error "unknown" :type (type value) :class (class value)})))
 
-(defn has-element-by-keyword?
+(defn- has-element-by-keyword?
   [el map keyword]
   (cond (empty? map) false
         (.contains
          (get map keyword []) el) true
         :else false))
 
-(defn is-indexed?
+(defn- is-indexed?
   [key configs]
   (has-element-by-keyword? key configs :indexed))
 
-(defn is-component?
+(defn- is-component?
   [key configs]
   (has-element-by-keyword? key configs :components))
 
-(defn is-historyless?
+(defn- is-historyless?
   [key configs]
   (has-element-by-keyword? key configs :historyless))
 
-(defn extract-key
+(defn- extract-key
   [key]
   (cond (keyword? key) key
-        (instance? schema.core.OptionalKey key) (get key :k)
+        (instance? OptionalKey key) (get key :k)
         :else key))
 
-(defn assoc-when-element-predicate-of-config
+(defn- assoc-when-element-predicate-of-config
   [map-to-assoc configs config-element predicate? key value]
   (if (predicate? config-element configs)
     (assoc map-to-assoc key value)
     map-to-assoc))
 
-(defn extract-key-extra-props-from-configs
+(defn- extract-key-extra-props-from-configs
   [key configs]
   (let [extra-props {}
         extra-props (assoc-when-element-predicate-of-config extra-props configs key is-indexed? :db/index true)
@@ -56,7 +57,7 @@
         extra-props (assoc-when-element-predicate-of-config extra-props configs key is-historyless? :db/noHistory true)]
     extra-props))
 
-(defn keyvalue-to-def
+(defn- keyvalue-to-def
   [key value configs]
   (let [extracted-key (extract-key key)
         base {:db/ident extracted-key
@@ -66,18 +67,23 @@
                (extract-key-extra-props-from-configs extracted-key configs))]
     (merge base extra)))
 
-(defn map-schema-to-datomic
+(defn- map-schema-to-datomic
   [[key value]]
   {:key key :value value})
 
 (defn schema-to-datomic
-  "converts {} schema to [{}...] datomic schema to be inserted into the database,
-  the configs are optional, with optional keys, as following
-  {:indexed [:ks...] :components [:ks...] :historyless [:ks...]}
-  a key sent in the list of the configs will have
-  in :indexed = db/indexed true
-  in :components = db/isComponent true
-  in :historyless = db/noHistory true"
+  "Converts {} schema to [{}...] datomic schema to be inserted into the database.
+  Configs are optional, with optional keys, as following:
+
+  - {:indexed [:ks...] :components [:ks...] :historyless [:ks...]}
+
+  A key sent in the list of the configs will have:
+
+  - in :indexed = db/indexed true
+
+  - in :components = db/isComponent true
+
+  - in :historyless = db/noHistory true"
   ([definition configs]
    (->> definition
         (mapv map-schema-to-datomic)
