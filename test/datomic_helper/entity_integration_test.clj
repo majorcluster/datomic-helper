@@ -60,6 +60,7 @@
     (are [matcher matching] (= [(:city-1 fixtures.movies/data)]
                                (d-h.entity/find-by-params (connect!) {:city/name (matcher matching)}))
       d-h.entity/v= "Leningrad"
+      d-h.entity/v-not= "Havana"
       d-h.entity/v-starts-with "Len"
       d-h.entity/v-ends-with "grad"
       d-h.entity/v-includes "ing"
@@ -72,6 +73,7 @@
                                (->> (d-h.entity/find-by-params (connect!) {:movie/year (matcher matching)})
                                     (map #(select-keys % [:movie/id :movie/name :movie/year]))))
       d-h.entity/v= 1977
+      d-h.entity/v-not= 1930
       d-h.entity/v> 1930
       d-h.entity/v>= 1931)
     (are [matcher matching] (= [(:movie-1 fixtures.movies/data) (:movie-2 fixtures.movies/data)]

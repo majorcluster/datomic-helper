@@ -43,6 +43,12 @@
    :v-first? true
    :args (list v)})
 
+(defn v-not=
+  [v]
+  {:fn not=
+   :v-first? true
+   :args (list v)})
+
 (defn v>
   [v]
   {:fn >
