@@ -1,5 +1,6 @@
 (ns datomic-helper.entity
   (:require [clojure.set :as cset]
+            [clojure.string :as str]
             [clojure.walk :as walk]
             [datomic.api :as d]))
 
@@ -32,9 +33,136 @@
              :where [?e ?id-ks ?id]]]
      (->> pull-opts
           (d/q q db id-ks id)
-          (transform-out))))
+          transform-out)))
   ([conn id-ks id]
    (find-by-id conn id-ks id '[*])))
+
+(defn v=
+  [v]
+  {:fn =
+   :v-first? true
+   :args (list v)})
+
+(defn v>
+  [v]
+  {:fn >
+   :v-first? true
+   :args (list v)})
+
+(defn v>=
+  [v]
+  {:fn >=
+   :v-first? true
+   :args (list v)})
+
+(defn v<
+  [v]
+  {:fn <
+   :v-first? true
+   :args (list v)})
+
+(defn v<=
+  [v]
+  {:fn <=
+   :v-first? true
+   :args (list v)})
+
+(defn v-starts-with
+  [v]
+  {:fn str/starts-with?
+   :v-first? true
+   :args (list v)})
+
+(defn v-ends-with
+  [v]
+  {:fn str/ends-with?
+   :v-first? true
+   :args (list v)})
+
+(defn v-includes
+  [v]
+  {:fn str/includes?
+   :v-first? true
+   :args (list v)})
+
+(defn v-matches
+  [v]
+  {:fn re-matches
+   :v-first? false
+   :args [v]})
+
+(defn v-custom->
+  [custom-fn & args]
+  {:fn custom-fn
+   :v-first? true
+   :args (vec args)})
+
+(defn v-custom->>
+  [custom-fn & args]
+  {:fn custom-fn
+   :v-first? false
+   :args (list args)})
+
+(defn- acc-param-fn-parts
+  [acc k v]
+  (-> acc
+      (assoc :where (concat (:where acc) (if (:v-first? v)
+                                           [[(symbol "?e") k (symbol (str "?_fn_" (:fn-where-pairs-count acc)))]
+                                            [(apply list (flatten
+                                                          [(:fn v)
+                                                           (symbol (str "?_fn_" (:fn-where-pairs-count acc)))
+                                                           (-> v :args)]))]]
+                                           [[(symbol "?e") k (symbol (str "?_fn_" (:fn-where-pairs-count acc)))]
+                                            [(apply list (flatten
+                                                          [(:fn v)
+                                                           (-> v :args)
+                                                           (symbol (str "?_fn_" (:fn-where-pairs-count acc)))]))]]))
+             :fn-where-pairs-count (inc (:fn-where-pairs-count acc)))))
+
+(defn- acc-param-parts
+  [kvs-map]
+  (reduce (fn [acc [k v]]
+            (if (and (map? v)
+                     (contains? v :fn)
+                     (contains? v :args))
+              (acc-param-fn-parts acc k v)
+              (-> acc
+                  (assoc :in (conj (:in acc) (symbol (str "?_" (count (:in acc)))))
+                         :where (conj (:where acc) [(symbol "?e") k (symbol (str "?_" (count (:in acc))))])
+                         :values (conj (:values acc) v)))))
+          {:in [] :where [] :values [] :fn-where-pairs-count 0}
+          kvs-map))
+
+(defn find-by-params
+  "finds results by params, pull-opts default is '[*]. kvs-map uses `=` as default strategy,
+  for different matchers use `v*` functions as stated in examples bellow.
+  ex:
+  - `(find-by-params conn {:product-id 1917}) => [{:product-id 1917}]`
+  - `(find-by-params conn {:product-id (v= 1917)}) => [{:product-id 1917}] ;equals (=)`
+  - `(find-by-params conn {:product-id (v> 1916)}) => [{:product-id 1917}] ;greater than (>)`
+  - `(find-by-params conn {:product-id (v>= 1917)}) => [{:product-id 1917}] ;greater than or equals (>=)`
+  - `(find-by-params conn {:product-id (v< 1918)}) => [{:product-id 1917}] ;less than (<)`
+  - `(find-by-params conn {:product-id (v<= 1917)}) => [{:product-id 1917}] ;less than or equals (<=)`
+  - `(find-by-params conn {:product-name (v-starts-with \"lil\")}) => [{:product-id 17 :product-name \"lilek\"}] ;clojure string starts with`
+  - `(find-by-params conn {:product-name (v-ends-with \"ek\")}) => [{:product-id 17 :product-name \"lilek\"}] ;clojure string ends with`
+  - `(find-by-params conn {:product-name (v-includes \"le\")}) => [{:product-id 17 :product-name \"lilek\"}] ;clojure string includes`
+  - `(find-by-params conn {:product-name (v-matches #\"[lilek]{1,5}\")}) => [{:product-id 17 :product-name \"lilek\"}] ;clojure regex re-matches`
+  - `(find-by-params conn {:product-id (v-custom-> some-fn some-arg)}) => [{:product-id 1917}] ;custom fn with argument being passed as first argument`
+  - `(find-by-params conn {:product-id (v-custom->> some-fn some-arg)}) => [{:product-id 1917}] ;custom fn with argument being passed as last argument`
+  - `(find-by-params conn {:product-id 1917} '[* {:product/category [*]]}) => {:product-id 1917, :product/category {:category/id 12}}`"
+  ([conn kvs-map pull-opts]
+   (let [db (d/db conn)
+         acc-parts (acc-param-parts kvs-map)
+         q '[:find [(pull ?e pattern) ...]
+             :in $ pattern]
+         q (concat q (:in acc-parts))
+         q (concat q [:where] (:where acc-parts))]
+     (->> acc-parts
+          :values
+          (apply d/q q db pull-opts)
+          transform-out)))
+  ([conn kvs-map]
+   (find-by-params conn kvs-map '[*])))
 
 (defn find-all
   "finds all entries having a key, pull-opts default is '[*].
@@ -48,7 +176,7 @@
              :where [?e ?id-ks]]]
      (->> pull-opts
           (d/q q db id-ks)
-          (transform-out))))
+          transform-out)))
   ([conn id-ks]
    (find-all conn id-ks '[*])))
 

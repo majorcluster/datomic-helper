@@ -6,6 +6,7 @@
 (defonce specs
   '(#:db{:ident :movie/id, :cardinality :db.cardinality/one, :valueType :db.type/uuid, :unique :db.unique/identity}
     #:db{:ident :movie/name, :cardinality :db.cardinality/one, :valueType :db.type/string}
+    #:db{:ident :movie/year, :cardinality :db.cardinality/one, :valueType :db.type/long}
     #:db{:ident :actor/id, :cardinality :db.cardinality/one, :valueType :db.type/uuid, :unique :db.unique/identity}
     #:db{:ident :actor/name, :cardinality :db.cardinality/one, :valueType :db.type/string}
     #:db{:ident :movie/actors, :cardinality :db.cardinality/many, :valueType :db.type/ref, :isComponent true}
@@ -26,8 +27,8 @@
 (def data
   {:city-1 {:city/name "Leningrad", :city/id (:city-1 ids)}
    :city-2 {:city/name "Havana", :city/id (:city-2 ids)}
-   :movie-1 {:movie/name "1917" :movie/id (:movie-1 ids)}
-   :movie-2 {:movie/name "Sitio de la isla" :movie/id (:movie-2 ids)}
+   :movie-1 {:movie/name "1917" :movie/id (:movie-1 ids) :movie/year 1930}
+   :movie-2 {:movie/name "Sitio de la isla" :movie/id (:movie-2 ids) :movie/year 1977}
    :actor-1 {:actor/name "Lenin" :actor/city [:city/id (:city-1 ids)] :actor/id (:actor-1 ids)}
    :actor-2 {:actor/name "Celia Sanchez" :actor/city [:city/id (:city-2 ids)] :actor/id (:actor-2 ids)}
    :actor-3 {:actor/name "El Fidel" :actor/city [:city/id (:city-2 ids)] :actor/id (:actor-3 ids)}})

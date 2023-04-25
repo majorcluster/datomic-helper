@@ -46,6 +46,64 @@
                                      :empty-datom/id
                                      '[* {:movie/actors [* {:actor/city [*]}]}])))))
 
+(defn my-pred-> [received-q f-const plus-const]
+  (> (+ received-q plus-const) f-const))
+
+(defn my-pred->> [f-const plus-const received-q]
+  (> (+ received-q plus-const) f-const))
+
+(deftest find-by-params-test
+  (testing "when found by simple match"
+    (is (= [(:city-1 fixtures.movies/data)]
+           (d-h.entity/find-by-params (connect!) {:city/name "Leningrad"}))))
+  (testing "when found by string matchers"
+    (are [matcher matching] (= [(:city-1 fixtures.movies/data)]
+                               (d-h.entity/find-by-params (connect!) {:city/name (matcher matching)}))
+      d-h.entity/v= "Leningrad"
+      d-h.entity/v-starts-with "Len"
+      d-h.entity/v-ends-with "grad"
+      d-h.entity/v-includes "ing"
+      d-h.entity/v-matches #"[a-zA-Z]{9}"))
+  (testing "when multiple match"
+    (is (= [(:city-1 fixtures.movies/data) (:city-2 fixtures.movies/data)]
+           (d-h.entity/find-by-params (connect!) {:city/name (d-h.entity/v-matches #"[a-zA-Z]+")}))))
+  (testing "when found by number matchers"
+    (are [matcher matching] (= [(:movie-2 fixtures.movies/data)]
+                               (->> (d-h.entity/find-by-params (connect!) {:movie/year (matcher matching)})
+                                    (map #(select-keys % [:movie/id :movie/name :movie/year]))))
+      d-h.entity/v= 1977
+      d-h.entity/v> 1930
+      d-h.entity/v>= 1931)
+    (are [matcher matching] (= [(:movie-1 fixtures.movies/data) (:movie-2 fixtures.movies/data)]
+                               (->> (d-h.entity/find-by-params (connect!) {:movie/year (matcher matching)})
+                                    (map #(select-keys % [:movie/id :movie/name :movie/year]))))
+      d-h.entity/v< 1978
+      d-h.entity/v<= 1977))
+  (testing "when found by custom matchers"
+    (is (= [(:movie-2 fixtures.movies/data)]
+           (->> (d-h.entity/find-by-params (connect!) {:movie/year (d-h.entity/v-custom-> my-pred-> 1968 10)})
+                (map #(select-keys % [:movie/id :movie/name :movie/year])))))
+    (is (= [(:movie-2 fixtures.movies/data)]
+           (->> (d-h.entity/find-by-params (connect!) {:movie/year (d-h.entity/v-custom->> my-pred->> 1968 10)})
+                (map #(select-keys % [:movie/id :movie/name :movie/year]))))))
+  (testing "when not found"
+    (is (empty? (d-h.entity/find-by-params (connect!) {:movie/name "none"}))))
+  (testing "when pull opts is sent"
+    (is (= [(assoc (:movie-1 fixtures.movies/data)
+              :movie/actors [(assoc (:actor-1 fixtures.movies/data)
+                               :actor/city (:city-1 fixtures.movies/data))])
+            (assoc (:movie-2 fixtures.movies/data)
+              :movie/actors [(assoc (:actor-2 fixtures.movies/data)
+                               :actor/city (:city-2 fixtures.movies/data))
+                             (assoc (:actor-3 fixtures.movies/data)
+                               :actor/city (:city-2 fixtures.movies/data))])]
+           (d-h.entity/find-by-params (connect!)
+                                      {:movie/year (d-h.entity/v> 1900)}
+                                      '[* {:movie/actors [* {:actor/city [*]}]}])))
+    (is (empty? (d-h.entity/find-by-params (connect!)
+                                           {:movie/name "none"}
+                                           '[* {:movie/actors [* {:actor/city [*]}]}])))))
+
 (deftest insert-test
   (let [new-city {:city/id (UUID/randomUUID)}
         new-city-2 {:city/id (UUID/randomUUID)}]
