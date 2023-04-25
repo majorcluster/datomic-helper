@@ -145,6 +145,7 @@
   ex:
   - `(find-by-params conn {:product-id 1917}) => [{:product-id 1917}]`
   - `(find-by-params conn {:product-id (v= 1917)}) => [{:product-id 1917}] ;equals (=)`
+  - `(find-by-params conn {:product-id (v-not= 1917)}) => [{:product-id 17}] ;not equals (not=)`
   - `(find-by-params conn {:product-id (v> 1916)}) => [{:product-id 1917}] ;greater than (>)`
   - `(find-by-params conn {:product-id (v>= 1917)}) => [{:product-id 1917}] ;greater than or equals (>=)`
   - `(find-by-params conn {:product-id (v< 1918)}) => [{:product-id 1917}] ;less than (<)`
