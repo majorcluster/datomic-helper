@@ -1,11 +1,11 @@
-(defproject org.clojars.majorcluster/datomic-helper "3.2.0"
+(defproject org.clojars.majorcluster/datomic-helper "3.3.0"
   :description "A Clojure Library with tools to help using datomic"
   :url "https://github.com/majorcluster/datomic-helper"
   :license {:name "The MIT License"
             :url "http://opensource.org/licenses/MIT"}
-  :dependencies [[org.clojure/clojure "1.11.1"]
+  :dependencies [[org.clojure/clojure "1.11.2"]
                  [prismatic/schema "1.4.1"]
-                 [com.datomic/datomic-free "0.9.5697"]]
+                 [com.datomic/peer "1.0.7075"]]
   :deploy-repositories [["clojars" {:url "https://repo.clojars.org"
                                     :username :env/clojars_username
                                     :password :env/clojars_password}]]
